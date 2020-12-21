@@ -1,0 +1,39 @@
+
+name: LXD without sudo
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    
+    - name: Add current user to LXD group
+      run: |
+        sudo usermod --append --groups lxd $(whoami)
+            
+    - name: Initialize LXD
+      run: |
+        sudo lxd init --auto
+      
+    - name: Check LXD Configuration
+      run: |
+        sg lxd -c "lxc info"
+        
+    - name: Launch Ubuntu 18.04 LXC Container
+      run: |
+        sg lxd -c "lxc launch ubuntu:18.04 ubuntu"
+    
+    - name: Wait for container to come online
+      run: |
+        sleep 5
+        
+    - name: List all available LXC container
+      run: |
+        sg lxd -c "lxc list"
+      
+    - name: Delete previously created container
+      run: |
+        sg lxd -c "lxc delete --force ubuntu"
